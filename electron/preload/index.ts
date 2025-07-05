@@ -1,27 +1,33 @@
 import { ipcRenderer, contextBridge } from 'electron'
+import type { IpcChannels } from '../../src/shared/types'
 
-// --------- Expose some API to the Renderer process ---------
-contextBridge.exposeInMainWorld('ipcRenderer', {
-  on(...args: Parameters<typeof ipcRenderer.on>) {
-    const [channel, listener] = args
-    return ipcRenderer.on(channel, (event, ...args) => listener(event, ...args))
+// --------- Expose Scheduler-Monkey API to the Renderer process ---------
+contextBridge.exposeInMainWorld('electronAPI', {
+  // Generic IPC methods
+  invoke: <K extends keyof IpcChannels>(channel: K, ...args: Parameters<IpcChannels[K]>) => 
+    ipcRenderer.invoke(channel, ...args) as Promise<ReturnType<IpcChannels[K]>>,
+  
+  on: (channel: string, callback: (...args: any[]) => void) => {
+    const subscription = (_event: Electron.IpcRendererEvent, ...args: any[]) => callback(...args)
+    ipcRenderer.on(channel, subscription)
+    
+    return () => {
+      ipcRenderer.removeListener(channel, subscription)
+    }
   },
-  off(...args: Parameters<typeof ipcRenderer.off>) {
-    const [channel, ...omit] = args
-    return ipcRenderer.off(channel, ...omit)
-  },
-  send(...args: Parameters<typeof ipcRenderer.send>) {
-    const [channel, ...omit] = args
-    return ipcRenderer.send(channel, ...omit)
-  },
-  invoke(...args: Parameters<typeof ipcRenderer.invoke>) {
-    const [channel, ...omit] = args
-    return ipcRenderer.invoke(channel, ...omit)
-  },
-
-  // You can expose other APTs you need here.
-  // ...
+  
+  send: (channel: string, ...args: any[]) => {
+    ipcRenderer.send(channel, ...args)
+  }
 })
+
+// Expose development utilities in dev mode
+if (process.env.NODE_ENV === 'development') {
+  contextBridge.exposeInMainWorld('devAPI', {
+    openDevTools: () => ipcRenderer.invoke('dev:open-devtools'),
+    reloadApp: () => ipcRenderer.invoke('dev:reload-app')
+  })
+}
 
 // --------- Preload scripts loading ---------
 function domReady(condition: DocumentReadyState[] = ['complete', 'interactive']) {
