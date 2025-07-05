@@ -28,9 +28,7 @@
               @click="$emit('close')"
               class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
             >
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <X class="w-6 h-6" />
             </button>
           </div>
 
@@ -62,9 +60,7 @@
                 :class="{ 'animate-spin': isLoading }"
                 title="Refresh logs"
               >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
+                <RotateCcw class="w-4 h-4" />
               </button>
               <button
                 @click="exportLogs"
@@ -72,9 +68,7 @@
                 class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 title="Export logs"
               >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+                <Download class="w-4 h-4" />
               </button>
               <button
                 @click="clearLogs"
@@ -92,9 +86,7 @@
           <!-- Empty State -->
           <div v-if="filteredLogs.length === 0" class="flex-1 flex items-center justify-center p-8">
             <div class="text-center text-gray-500 dark:text-gray-400">
-              <svg class="w-16 h-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
+              <FileText class="w-16 h-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
               <p class="text-lg font-medium mb-2">No logs found</p>
               <p class="text-sm">
                 {{ activeStatusFilter === 'all' ? 'No execution logs available' : `No ${activeStatusFilter} executions found` }}
@@ -155,14 +147,9 @@
                     @click="toggleLogExpansion(log.id)"
                     class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
                   >
-                    <svg 
+                    <ChevronDown 
                       :class="['w-4 h-4 transition-transform', expandedLogs.has(log.id) ? 'rotate-180' : '']"
-                      fill="none" 
-                      stroke="currentColor" 
-                      viewBox="0 0 24 24"
-                    >
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
+                    />
                   </button>
                 </div>
 
@@ -233,6 +220,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useAppStore } from '../stores/app'
 import type { Schedule, ScheduleLog } from '../shared/types'
+import { X, RotateCcw, Download, FileText, ChevronDown } from 'lucide-vue-next'
 
 interface Props {
   isOpen: boolean

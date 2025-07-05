@@ -16,10 +16,7 @@
             <div class="flex items-center space-x-3">
               <!-- Bun.js Logo/Icon -->
               <div class="flex-shrink-0 h-10 w-10 bg-orange-100 dark:bg-orange-900/20 rounded-lg flex items-center justify-center">
-                <svg class="h-6 w-6 text-orange-600 dark:text-orange-400" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
-                  <path d="M12 6a6 6 0 100 12 6 6 0 000-12zm0 10a4 4 0 110-8 4 4 0 010 8z"/>
-                </svg>
+                <Circle class="h-6 w-6 text-orange-600 dark:text-orange-400" />
               </div>
               <div>
                 <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
@@ -35,9 +32,7 @@
               @click="$emit('close')"
               class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
             >
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <X class="w-6 h-6" />
             </button>
           </div>
         </div>
@@ -47,9 +42,7 @@
           <!-- Installation Status -->
           <div v-if="installationStatus === 'checking'" class="text-center py-8">
             <div class="animate-spin mx-auto h-8 w-8 text-blue-600 dark:text-blue-400 mb-4">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
+              <Loader class="w-full h-full" />
             </div>
             <p class="text-gray-600 dark:text-gray-400">Checking Bun.js installation...</p>
           </div>
@@ -58,9 +51,7 @@
           <div v-else-if="installationStatus === 'not-installed'" class="space-y-6">
             <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
               <div class="flex items-start space-x-3">
-                <svg class="h-5 w-5 text-yellow-400 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                </svg>
+                <AlertTriangle class="h-5 w-5 text-yellow-400 mt-0.5" />
                 <div>
                   <h4 class="text-sm font-medium text-yellow-800 dark:text-yellow-400">Bun.js Not Found</h4>
                   <p class="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
@@ -104,9 +95,7 @@
           <div v-else-if="installationStatus === 'installing'" class="space-y-6">
             <div class="text-center">
               <div class="animate-spin mx-auto h-8 w-8 text-blue-600 dark:text-blue-400 mb-4">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
+                <Loader class="w-full h-full" />
               </div>
               <h4 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Installing Bun.js</h4>
               <p class="text-sm text-gray-600 dark:text-gray-400">Please wait while we download and install Bun.js...</p>
@@ -137,9 +126,7 @@
           <!-- Installation Success -->
           <div v-else-if="installationStatus === 'installed'" class="text-center py-8">
             <div class="mx-auto h-12 w-12 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mb-4">
-              <svg class="h-6 w-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
+              <Check class="h-6 w-6 text-green-600 dark:text-green-400" />
             </div>
             <h4 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Installation Complete!</h4>
             <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
@@ -156,9 +143,7 @@
           <div v-else-if="installationStatus === 'error'" class="space-y-4">
             <div class="text-center">
               <div class="mx-auto h-12 w-12 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mb-4">
-                <svg class="h-6 w-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <X class="h-6 w-6 text-red-600 dark:text-red-400" />
               </div>
               <h4 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Installation Failed</h4>
               <p class="text-sm text-gray-600 dark:text-gray-400">
@@ -225,6 +210,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import { Circle, X, Loader, AlertTriangle, Check, RotateCcw } from 'lucide-vue-next'
 
 interface Props {
   isOpen: boolean
