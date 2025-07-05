@@ -39,6 +39,19 @@
               : 'border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800'
           ]"
           @click="viewScheduleLogs(schedule)"
+          v-tippy="{
+            content: `<div class='p-1'>
+              <p class='font-semibold'>${schedule.fileName}</p>
+              <p class='text-xs'>Path: ${schedule.filePath}</p>
+              <p class='text-xs'>Cron: ${schedule.cronExpression}</p>
+              <p class='text-xs'>Next run: ${getNextRunTime(schedule.cronExpression)}</p>
+              <p class='text-xs mt-1'>Click to view logs</p>
+            </div>`,
+            allowHTML: true,
+            placement: 'right',
+            theme: 'light-border',
+            interactive: true
+          }"
         >
           <!-- Schedule Status -->
           <div class="flex items-center justify-between mb-2">
