@@ -25,6 +25,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@keenthemes/ktui": "^1.0.19",
     "better-sqlite3": "^11.7.0",
     "drizzle-orm": "^0.36.4",
     "node-cron": "^3.0.3",

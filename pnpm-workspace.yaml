@@ -2,3 +2,6 @@ onlyBuiltDependencies:
   - '@parcel/watcher'
   - electron
   - esbuild
+ignoredBuiltDependencies:
+  - better-sqlite3
+  - vue-demi
