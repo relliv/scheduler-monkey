@@ -1,79 +1,83 @@
-# electron-vite-vue-tw
+# Scheduler Monkey
 
-🥳 Really simple `Electron` + `Vue` + `Vite` + `TailwindCSS` boilerplate.
+Scheduler Monkey is a desktop application that helps you manage, schedule, and execute scripts with ease on your local machine with simple UI. Built with Electron, Vue 3, and TypeScript, it provides a clean and intuitive interface for organizing your automation scripts and running them on customizable schedules.
 
-<!-- [![awesome-vite](https://awesome.re/mentioned-badge.svg)](https://github.com/vitejs/awesome-vite) -->
-<!-- [![Netlify Status](https://api.netlify.com/api/v1/badges/ae3863e3-1aec-4eb1-8f9f-1890af56929d/deploy-status)](https://app.netlify.com/sites/electron-vite/deploys) -->
-<!-- [![GitHub license](https://img.shields.io/github/license/caoxiemeihao/electron-vite-vue)](https://github.com/electron-vite/electron-vite-vue/blob/main/LICENSE) -->
-<!-- [![GitHub stars](https://img.shields.io/github/stars/caoxiemeihao/electron-vite-vue?color=fa6470)](https://github.com/electron-vite/electron-vite-vue) -->
-<!-- [![GitHub forks](https://img.shields.io/github/forks/caoxiemeihao/electron-vite-vue)](https://github.com/electron-vite/electron-vite-vue) -->
-[![GitHub Build](https://github.com/electron-vite/electron-vite-vue/actions/workflows/build.yml/badge.svg)](https://github.com/electron-vite/electron-vite-vue/actions/workflows/build.yml)
-[![GitHub Discord](https://img.shields.io/badge/chat-discord-blue?logo=discord)](https://discord.gg/sRqjYpEAUK)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
 ## Features
 
-📦 Out of the box  
-🎯 Based on the official [template-vue-ts](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-vue-ts), less invasive  
-🌱 Extensible, really simple directory structure  
-💪 Support using Node.js API in Electron-Renderer  
-🔩 Support C/C++ native addons  
-🖥 It's easy to implement multiple windows  
+🚀 **Script Management** - Organize scripts in vault directories for easy access and management  
+⏰ **Cron-based Scheduling** - Schedule scripts to run at specific times using cron expressions  
+📊 **Execution Logging** - Track script execution history with detailed logs including output and errors  
+🔄 **Real-time Updates** - See execution results in real-time with automatic UI updates  
+📝 **Script Editor** - Built-in Monaco editor for creating and editing scripts  
+🌙 **Dark Mode Support** - Comfortable viewing experience in any lighting condition  
+🔒 **Local Storage** - All data is stored locally using SQLite for privacy and performance
 
-## Quick Setup
+## Installation
 
 ```sh
-# clone the project
-git clone https://github.com/electron-vite/electron-vite-vue.git
+# Clone the repository
+git clone https://github.com/relliv/scheduler-monkey.git
 
-# enter the project directory
-cd electron-vite-vue
+# Enter the project directory
+cd scheduler-monkey
 
-# install dependency
-npm install
+# Install dependencies
+pnpm install
 
-# develop
-npm run dev
+# Start the development server
+pnpm dev
+
+# Build for production
+pnpm build
 ```
 
-## Debug
+## Usage
 
-![electron-vite-react-debug.gif](https://github.com/electron-vite/electron-vite-react/blob/main/electron-vite-react-debug.gif?raw=true)
+1. **Select a Vault Directory** - Choose a directory where your scripts are stored
+2. **Create or Import Scripts** - Add new scripts or use existing ones in your vault
+3. **Schedule Scripts** - Set up cron expressions to determine when scripts should run
+4. **Monitor Execution** - View logs and results of script executions
 
-## Directory
+## Supported Script Types
 
-```diff
-+ ├─┬ electron
-+ │ ├─┬ main
-+ │ │ └── index.ts    entry of Electron-Main
-+ │ └─┬ preload
-+ │   └── index.ts    entry of Preload-Scripts
-  ├─┬ src
-  │ └── main.ts       entry of Electron-Renderer
-  ├── index.html
-  ├── package.json
-  └── vite.config.ts
+Scheduler Monkey supports various script types including:
+
+- JavaScript/TypeScript (`.js`, `.ts`)
+- Shell scripts (`.sh`)
+- Python (`.py`)
+- And more!
+
+## Technology Stack
+
+- **Frontend**: Vue 3, TypeScript, TailwindCSS
+- **Backend**: Electron, Node.js
+- **Database**: SQLite with Drizzle ORM
+- **Scheduling**: node-cron
+- **Editor**: Monaco Editor
+- **State Management**: Pinia
+
+## Project Structure
+
+```markdown
+scheduler-monkey/
+├── electron/           # Electron main and preload scripts
+├── src/
+│   ├── components/     # Vue components
+│   ├── database/       # Database schema and queries
+│   ├── layouts/        # Layout components
+│   ├── stores/         # Pinia stores
+│   ├── shared/         # Shared types and utilities
+│   └── App.vue         # Main application component
+├── public/             # Static assets
+└── index.html          # Entry HTML file
 ```
 
-<!--
-## Be aware
+## Contributing
 
-🚨 By default, this template integrates Node.js in the Renderer process. If you don't need it, you just remove the option below. [Because it will modify the default config of Vite](https://github.com/electron-vite/vite-plugin-electron-renderer#config-presets-opinionated).
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-```diff
-# vite.config.ts
+## License
 
-export default {
-  plugins: [
--   // Use Node.js API in the Renderer-process
--   renderer({
--     nodeIntegration: true,
--   }),
-  ],
-}
-```
--->
-
-## FAQ
-
-- [C/C++ addons, Node.js modules - Pre-Bundling](https://github.com/electron-vite/vite-plugin-electron-renderer#dependency-pre-bundling)
-- [dependencies vs devDependencies](https://github.com/electron-vite/vite-plugin-electron-renderer#dependencies-vs-devdependencies)
+This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
