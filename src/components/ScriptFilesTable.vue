@@ -14,6 +14,26 @@
           </p>
         </div>
 
+        <!-- Filter Tabs -->
+        <div class="flex space-x-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+          <button
+            v-for="tab in filterTabs"
+            :key="tab.key"
+            @click="activeFilter = tab.key"
+            :class="[
+              'px-3 py-1 text-sm font-medium rounded-md transition-colors',
+              activeFilter === tab.key
+                ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200',
+            ]"
+          >
+            {{ tab.label }}
+            <span v-if="tab.count !== undefined" class="ml-1 text-xs opacity-75"
+              >({{ tab.count }})</span
+            >
+          </button>
+        </div>
+
         <!-- Create Script Button -->
         <button
           @click="$emit('create-script')"
@@ -34,26 +54,6 @@
           </svg>
           <span>Create Script</span>
         </button>
-
-        <!-- Filter Tabs -->
-        <div class="flex space-x-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
-          <button
-            v-for="tab in filterTabs"
-            :key="tab.key"
-            @click="activeFilter = tab.key"
-            :class="[
-              'px-3 py-1 text-sm font-medium rounded-md transition-colors',
-              activeFilter === tab.key
-                ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
-                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200',
-            ]"
-          >
-            {{ tab.label }}
-            <span v-if="tab.count !== undefined" class="ml-1 text-xs opacity-75"
-              >({{ tab.count }})</span
-            >
-          </button>
-        </div>
       </div>
     </div>
 
