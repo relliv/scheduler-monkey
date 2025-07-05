@@ -1,9 +1,9 @@
 // @see https://www.electron.build/configuration.html
 {
   $schema: "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
-  appId: "YourAppID",
+  appId: "com.relliv.scheduler-monkey",
   asar: true,
-  productName: "YourAppName",
+  productName: "Scheduler Monkey",
   directories: {
     output: "release/${version}",
   },
