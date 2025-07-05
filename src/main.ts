@@ -1,6 +1,7 @@
 import { createApp } from "vue";
 import { createPinia } from "pinia";
 import App from "./App.vue";
+import TippyPlugin from "./plugins/tippy";
 
 import "./style.scss";
 
@@ -12,6 +13,7 @@ const pinia = createPinia();
 const app = createApp(App);
 
 app.use(pinia);
+app.use(TippyPlugin);
 
 app.mount("#app").$nextTick(() => {
   postMessage({ payload: "removeLoading" }, "*");
