@@ -227,7 +227,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useAppStore } from '../stores/app'
 import type { Schedule, ScheduleLog } from '../shared/types'
 
@@ -372,6 +372,13 @@ function handleBackdropClick(event: MouseEvent) {
 // Load logs when component is mounted
 onMounted(async () => {
   if (props.isOpen) {
+    await refreshLogs()
+  }
+})
+
+// Watch for changes to isOpen prop and refresh logs when modal is opened
+watch(() => props.isOpen, async (isOpen) => {
+  if (isOpen) {
     await refreshLogs()
   }
 })
