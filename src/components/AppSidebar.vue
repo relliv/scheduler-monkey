@@ -106,9 +106,10 @@
         </button>
         <button
           @click="viewAllLogs"
-          class="text-sm px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-md transition-colors"
+          class="text-sm px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-md transition-colors flex items-center justify-center space-x-1"
         >
-          View Logs
+          <span>View Logs</span>
+          <span v-if="logCount > 0" class="bg-gray-800 text-xs px-1.5 py-0.5 rounded-full">{{ logCount }}</span>
         </button>
       </div>
     </div>
@@ -116,7 +117,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, onMounted } from 'vue'
+import { useAppStore } from '../stores/app'
 import type { Schedule } from '../shared/types'
 
 interface Props {
@@ -130,6 +132,25 @@ interface Emits {
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
+
+const store = useAppStore()
+const logCount = ref(0)
+
+// Get total log count
+async function fetchLogCount() {
+  try {
+    // Load logs without displaying them to get the count
+    await store.loadLogs()
+    logCount.value = store.logs.length
+  } catch (error) {
+    console.error('Failed to fetch log count:', error)
+  }
+}
+
+// Fetch log count on component mount
+onMounted(() => {
+  fetchLogCount()
+})
 
 // View schedule logs
 function viewScheduleLogs(schedule: Schedule) {
@@ -175,7 +196,9 @@ async function stopAllSchedules() {
 }
 
 // View all logs
-function viewAllLogs() {
+async function viewAllLogs() {
+  // Refresh log count before opening logs modal
+  await fetchLogCount()
   emit('view-logs', null as any) // Pass null to show all logs
 }
 
