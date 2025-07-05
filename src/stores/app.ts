@@ -260,10 +260,25 @@ export const useAppStore = defineStore('app', () => {
   async function executeScript(scriptFile: ScriptFile) {
     try {
       setLoading(true)
+      const startTime = Date.now()
       const result = await window.electronAPI.invoke('bun:execute-script', scriptFile.fullPath)
+      const executionDuration = Date.now() - startTime
       
-      // Skip creating log entries for manual executions to avoid foreign key constraint issues
-      // Manual executions don't have an associated schedule ID
+      // Create log entry for manual execution
+      try {
+        await window.electronAPI.invoke('database:create-manual-log', {
+          fileName: scriptFile.name,
+          filePath: scriptFile.fullPath,
+          status: result.success ? 'success' : 'error',
+          output: result.output || '',
+          errorMessage: result.error || '',
+          executionTime: new Date(),
+          executionDuration
+        })
+      } catch (logErr) {
+        console.error('Failed to create log entry:', logErr)
+        // Don't throw here to avoid interrupting the main flow
+      }
       
       return result
     } catch (err) {

@@ -73,7 +73,9 @@ function runMigrations() {
     const createScheduleLogsTable = `
       CREATE TABLE IF NOT EXISTS schedule_logs (
         id TEXT PRIMARY KEY,
-        schedule_id TEXT NOT NULL,
+        schedule_id TEXT,
+        file_name TEXT NOT NULL,
+        file_path TEXT NOT NULL,
         execution_time INTEGER NOT NULL,
         status TEXT NOT NULL CHECK (status IN ('success', 'error', 'timeout')),
         output TEXT,
@@ -85,7 +87,57 @@ function runMigrations() {
     
     sqlite.exec(createVaultsTable);
     sqlite.exec(createSchedulesTable);
-    sqlite.exec(createScheduleLogsTable);
+    
+    // Check if we need to migrate the schedule_logs table
+    const tableInfo = sqlite.prepare("PRAGMA table_info(schedule_logs)").all();
+    
+    if (tableInfo.length === 0) {
+      // Table doesn't exist, create it
+      sqlite.exec(createScheduleLogsTable);
+    } else {
+      // Table exists, check if we need to add columns
+      interface ColumnInfo {
+        name: string;
+        type: string;
+        notnull: number;
+        dflt_value: string | null;
+        pk: number;
+      }
+      
+      const hasFileName = tableInfo.some((col: ColumnInfo) => col.name === 'file_name');
+      const hasFilePath = tableInfo.some((col: ColumnInfo) => col.name === 'file_path');
+      const scheduleIdCol = tableInfo.find((col: ColumnInfo) => col.name === 'schedule_id');
+      
+      // Create a temporary table with the new schema
+      if (!hasFileName || !hasFilePath || (scheduleIdCol && scheduleIdCol.notnull === 1)) {
+        console.log('Migrating schedule_logs table to add new columns and make schedule_id nullable');
+        
+        // Rename the old table
+        sqlite.exec('ALTER TABLE schedule_logs RENAME TO schedule_logs_old;');
+        
+        // Create the new table
+        sqlite.exec(createScheduleLogsTable);
+        
+        // Copy data from old table to new table
+        sqlite.exec(`
+          INSERT INTO schedule_logs (id, schedule_id, file_name, file_path, execution_time, status, output, error_message, execution_duration)
+          SELECT 
+            id, 
+            schedule_id, 
+            '' as file_name, 
+            '' as file_path, 
+            execution_time, 
+            status, 
+            output, 
+            error_message, 
+            execution_duration 
+          FROM schedule_logs_old;
+        `);
+        
+        // Drop the old table
+        sqlite.exec('DROP TABLE schedule_logs_old;');
+      }
+    }
     
     console.log('Database migrations completed');
   } catch (error) {

@@ -60,6 +60,15 @@ export interface IpcChannels {
     limit?: number
   ) => Promise<ScheduleLog[]>;
   "database:create-log": (log: Omit<ScheduleLog, "id">) => Promise<ScheduleLog>;
+  "database:create-manual-log": (log: {
+    fileName: string;
+    filePath: string;
+    status: 'success' | 'error';
+    output: string;
+    errorMessage: string;
+    executionTime: Date;
+    executionDuration: number;
+  }) => Promise<ScheduleLog>;
 
   // File system operations
   "file:select-directory": () => Promise<string | null>;

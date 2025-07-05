@@ -25,7 +25,9 @@ export const schedules = sqliteTable('schedules', {
 // Schedule logs table - stores execution history
 export const scheduleLogs = sqliteTable('schedule_logs', {
   id: text('id').primaryKey(),
-  scheduleId: text('schedule_id').notNull().references(() => schedules.id, { onDelete: 'cascade' }),
+  scheduleId: text('schedule_id').references(() => schedules.id, { onDelete: 'cascade' }),
+  fileName: text('file_name').notNull(),
+  filePath: text('file_path').notNull(),
   executionTime: integer('execution_time', { mode: 'timestamp' }).notNull(),
   status: text('status', { enum: ['success', 'error', 'timeout'] }).notNull(),
   output: text('output'), // stdout

@@ -208,9 +208,49 @@ function setupDatabaseHandlers() {
   })
 
   ipcMain.handle('database:create-log', async (_, logData: Omit<ScheduleLog, 'id'>): Promise<ScheduleLog> => {
+    // Get schedule info for file name and path
+    let fileName = '';
+    let filePath = '';
+    
+    if (logData.scheduleId) {
+      const schedule = db.select().from(schedules).where(eq(schedules.id, logData.scheduleId)).get();
+      if (schedule) {
+        fileName = schedule.fileName;
+        filePath = schedule.filePath;
+      }
+    }
+    
     const newLog: ScheduleLog = {
       id: uuidv4(),
+      fileName: fileName,
+      filePath: filePath,
       ...logData
+    }
+    
+    await db.insert(scheduleLogs).values(newLog)
+    return newLog
+  })
+
+  ipcMain.handle('database:create-manual-log', async (_, logData: {
+    fileName: string;
+    filePath: string;
+    status: 'success' | 'error';
+    output: string;
+    errorMessage: string;
+    executionTime: Date;
+    executionDuration: number;
+  }): Promise<ScheduleLog> => {
+    // Create a log entry for manual execution (without a scheduleId)
+    const newLog: ScheduleLog = {
+      id: uuidv4(),
+      scheduleId: null, // Allow null for manual executions
+      fileName: logData.fileName,
+      filePath: logData.filePath,
+      status: logData.status,
+      output: logData.output,
+      errorMessage: logData.errorMessage,
+      executionTime: logData.executionTime,
+      executionDuration: logData.executionDuration
     }
     
     await db.insert(scheduleLogs).values(newLog)
@@ -416,6 +456,8 @@ async function addScheduleJob(schedule: Schedule): Promise<void> {
       // Log execution result
       const logEntry: Omit<ScheduleLog, 'id'> = {
         scheduleId: schedule.id,
+        fileName: schedule.fileName,
+        filePath: schedule.filePath,
         executionTime: new Date(startTime),
         status: result.success ? 'success' : 'error',
         output: result.output,
