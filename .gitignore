@@ -28,3 +28,8 @@ release
 package-lock.json
 pnpm-lock.yaml
 yarn.lock
+
+scheduler-monkey.db
+scheduler-monkey.db-journal
+scheduler-monkey.db-shm
+scheduler-monkey.db-wal
