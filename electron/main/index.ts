@@ -237,6 +237,21 @@ function setupFileSystemHandlers() {
     // TODO: Implement file watching
     console.log('File watching not yet implemented for:', directoryPath)
   })
+
+  ipcMain.handle('file:write', async (_, options: { path: string, content: string }): Promise<void> => {
+    try {
+      // Ensure the directory exists
+      const directory = path.dirname(options.path);
+      await fs.mkdir(directory, { recursive: true });
+      
+      // Write the file
+      await fs.writeFile(options.path, options.content, 'utf-8');
+      console.log(`File written successfully: ${options.path}`);
+    } catch (error) {
+      console.error('Error writing file:', error);
+      throw error;
+    }
+  })
 }
 
 // Scheduler IPC handlers
