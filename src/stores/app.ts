@@ -262,17 +262,8 @@ export const useAppStore = defineStore('app', () => {
       setLoading(true)
       const result = await window.electronAPI.invoke('bun:execute-script', scriptFile.fullPath)
       
-      // Create a log entry for manual execution
-      if (currentVault.value) {
-        await window.electronAPI.invoke('database:create-log', {
-          scheduleId: '', // Manual execution
-          executionTime: new Date(),
-          status: result.success ? 'success' : 'error',
-          output: result.output,
-          errorMessage: result.error,
-          executionDuration: result.duration
-        })
-      }
+      // Skip creating log entries for manual executions to avoid foreign key constraint issues
+      // Manual executions don't have an associated schedule ID
       
       return result
     } catch (err) {
