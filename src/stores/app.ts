@@ -298,8 +298,11 @@ export const useAppStore = defineStore('app', () => {
           fileName: scriptFile.name,
           filePath: scriptFile.fullPath,
           cronExpression: 'manual',
-          isActive: false
-        }
+          isActive: false,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          vaultId: currentVault.value?.id || 'default'
+        } as Schedule
         
         // Notify UI about the execution
         await window.electronAPI.invoke('scheduler:notify', {
