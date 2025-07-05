@@ -21,7 +21,7 @@
           class="bg-white dark:bg-gray-800 px-6 pt-6 pb-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0"
         >
           <div class="flex items-center space-x-2 mb-4 w-full">
-            <div>
+            <div class="flex flex-col flex-1">
               <h3
                 class="text-lg leading-6 font-medium text-gray-900 dark:text-white"
               >
@@ -52,8 +52,8 @@
           </div>
 
           <!-- File Info -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
+          <div class="flex flex-row gap-4 mb-4 w-full">
+            <div class="flex flex-col flex-1">
               <label
                 for="fileName"
                 class="block text-sm font-medium text-gray-700 dark:text-gray-300"
@@ -76,26 +76,6 @@
               >
                 File name is required
               </p>
-            </div>
-
-            <div>
-              <label
-                for="scriptType"
-                class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-              >
-                Script Type
-              </label>
-              <div class="mt-1">
-                <select
-                  id="scriptType"
-                  v-model="scriptType"
-                  class="block w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  :disabled="!!scriptFile"
-                >
-                  <option value="js">JavaScript (.js)</option>
-                  <option value="ts">TypeScript (.ts)</option>
-                </select>
-              </div>
             </div>
           </div>
         </div>
@@ -153,7 +133,6 @@ const emit = defineEmits<Emits>();
 
 // State
 const fileName = ref("");
-const scriptType = ref("js");
 const editorContent = ref("");
 const editorContainer = ref<HTMLElement | null>(null);
 const isSaving = ref(false);
@@ -183,13 +162,11 @@ watch(
   (newFile) => {
     if (newFile) {
       fileName.value = newFile.name;
-      scriptType.value = newFile.name.endsWith(".ts") ? "ts" : "js";
 
       // Load file content
       loadFileContent(newFile);
     } else {
       fileName.value = "";
-      scriptType.value = "js";
       editorContent.value = getDefaultTemplate();
 
       // Update editor content if it exists
@@ -230,7 +207,7 @@ function initializeEditor() {
   // Create editor instance
   editor = monaco.editor.create(editorContainer.value, {
     value: props.scriptFile ? "" : getDefaultTemplate(),
-    language: scriptType.value === "ts" ? "typescript" : "javascript",
+    language: "typescript",
     theme: "custom-theme",
     automaticLayout: true,
     minimap: {
@@ -243,15 +220,7 @@ function initializeEditor() {
     wordWrap: "on",
   });
 
-  // Update editor content when scriptType changes
-  watch(scriptType, (newType) => {
-    if (editor) {
-      monaco.editor.setModelLanguage(
-        editor.getModel()!,
-        newType === "ts" ? "typescript" : "javascript"
-      );
-    }
-  });
+  // TypeScript is the default language
 
   // Load content if scriptFile is provided
   if (props.scriptFile) {
@@ -304,15 +273,15 @@ async function saveScript() {
 
     // Ensure file has correct extension
     let name = fileName.value;
-    if (!name.endsWith(`.${scriptType.value}`)) {
-      name = `${name}.${scriptType.value}`;
+    if (!name.endsWith(".ts")) {
+      name = `${name}.ts`;
     }
 
     // Emit save event with file data
     emit("save", {
       name,
       content,
-      type: scriptType.value,
+      type: "ts",
     });
 
     isSaving.value = false;
@@ -324,10 +293,9 @@ async function saveScript() {
   }
 }
 
-// Get default template based on script type
+// Get default template
 function getDefaultTemplate(): string {
-  if (scriptType.value === "ts") {
-    return `/**
+  return `/**
  * TypeScript Script
  * 
  * This script will be executed according to its schedule.
@@ -345,26 +313,6 @@ main()
   .then(() => console.log('Script completed successfully'))
   .catch((error) => console.error('Script failed:', error));
 `;
-  } else {
-    return `/**
- * JavaScript Script
- * 
- * This script will be executed according to its schedule.
- */
-
-// Your code here
-const main = async () => {
-  console.log('Script executed at:', new Date().toISOString());
-  
-  // Add your code here
-};
-
-// Execute the main function
-main()
-  .then(() => console.log('Script completed successfully'))
-  .catch((error) => console.error('Script failed:', error));
-`;
-  }
 }
 
 // Handle backdrop click to close modal
