@@ -211,8 +211,11 @@
 
         <!-- Footer -->
         <div class="bg-gray-50 dark:bg-gray-700 px-6 py-3 flex justify-between items-center flex-shrink-0">
-          <div class="text-sm text-gray-500 dark:text-gray-400">
-            Showing {{ filteredLogs.length }} of {{ store.logs.length }} entries
+          <div class="text-sm text-gray-500 dark:text-gray-400 flex flex-col sm:flex-row sm:items-center">
+            <span>Showing {{ filteredLogs.length }} of {{ store.logs.length }} entries</span>
+            <span class="sm:ml-2 sm:before:content-['•'] sm:before:mx-2 text-xs mt-1 sm:mt-0">
+              Last checked: {{ formatDateTime(lastCheckedTime) }}
+            </span>
           </div>
           <button
             @click="$emit('close')"
@@ -246,6 +249,7 @@ const emit = defineEmits<Emits>()
 const store = useAppStore()
 const activeStatusFilter = ref<'all' | 'success' | 'error'>('all')
 const expandedLogs = ref(new Set<string>())
+const lastCheckedTime = ref(new Date())
 const isLoading = ref(false)
 
 // Status filters with counts
@@ -296,6 +300,8 @@ async function refreshLogs() {
     isLoading.value = true
     const scheduleId = props.schedule?.id
     await store.loadLogs(scheduleId, 100)
+    // Update last checked time
+    lastCheckedTime.value = new Date()
   } catch (error) {
     console.error('Failed to refresh logs:', error)
   } finally {
