@@ -252,6 +252,17 @@ function setupFileSystemHandlers() {
       throw error;
     }
   })
+
+  ipcMain.handle('file:read', async (_, filePath: string): Promise<string> => {
+    try {
+      const content = await fs.readFile(filePath, 'utf-8');
+      console.log(`File read successfully: ${filePath}`);
+      return content;
+    } catch (error) {
+      console.error('Error reading file:', error);
+      throw error;
+    }
+  })
 }
 
 // Scheduler IPC handlers
