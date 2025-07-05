@@ -45,9 +45,6 @@ pnpm build
 Scheduler Monkey supports various script types including:
 
 - JavaScript/TypeScript (`.js`, `.ts`)
-- Shell scripts (`.sh`)
-- Python (`.py`)
-- And more!
 
 ## Technology Stack
 
