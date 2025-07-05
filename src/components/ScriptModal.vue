@@ -156,10 +156,11 @@ const fileName = ref("");
 const scriptType = ref("js");
 const editorContent = ref("");
 const editorContainer = ref<HTMLElement | null>(null);
-const editor = ref<monaco.editor.IStandaloneCodeEditor | null>(null);
 const isSaving = ref(false);
 const showValidation = ref(false);
 const editorStatus = ref("Ready");
+
+let editor: monaco.editor.IStandaloneCodeEditor | null = null;
 
 // Initialize editor when component is mounted
 onMounted(async () => {
@@ -171,8 +172,8 @@ onMounted(async () => {
 
 // Clean up editor when component is unmounted
 onBeforeUnmount(() => {
-  if (editor.value) {
-    editor.value.dispose();
+  if (editor) {
+    editor.dispose();
   }
 });
 
@@ -192,8 +193,8 @@ watch(
       editorContent.value = getDefaultTemplate();
 
       // Update editor content if it exists
-      if (editor.value) {
-        editor.value.setValue(editorContent.value);
+      if (editor) {
+        editor.setValue(editorContent.value);
       }
     }
   },
@@ -206,7 +207,7 @@ watch(
   async (isOpen) => {
     if (isOpen) {
       await nextTick();
-      if (!editor.value && editorContainer.value) {
+      if (!editor && editorContainer.value) {
         initializeEditor();
       }
     }
@@ -227,7 +228,7 @@ function initializeEditor() {
   });
 
   // Create editor instance
-  editor.value = monaco.editor.create(editorContainer.value, {
+  editor = monaco.editor.create(editorContainer.value, {
     value: props.scriptFile ? "" : getDefaultTemplate(),
     language: scriptType.value === "ts" ? "typescript" : "javascript",
     theme: "custom-theme",
@@ -244,9 +245,9 @@ function initializeEditor() {
 
   // Update editor content when scriptType changes
   watch(scriptType, (newType) => {
-    if (editor.value) {
+    if (editor) {
       monaco.editor.setModelLanguage(
-        editor.value.getModel()!,
+        editor.getModel()!,
         newType === "ts" ? "typescript" : "javascript"
       );
     }
@@ -258,9 +259,9 @@ function initializeEditor() {
   }
 
   // Set up change event listener
-  editor.value.onDidChangeModelContent(() => {
-    if (editor.value) {
-      editorContent.value = editor.value.getValue();
+  editor.onDidChangeModelContent(() => {
+    if (editor) {
+      editorContent.value = editor.getValue();
     }
   });
 }
@@ -276,8 +277,8 @@ async function loadFileContent(file: ScriptFile) {
     )) as string;
     editorContent.value = content || "// Unable to read file content";
 
-    if (editor.value) {
-      editor.value.setValue(content || "// Unable to read file content");
+    if (editor) {
+      editor.setValue(content || "// Unable to read file content");
     }
 
     editorStatus.value = "Ready";
@@ -299,9 +300,7 @@ async function saveScript() {
     editorStatus.value = "Saving...";
 
     // Get current content from editor
-    const content = editor.value
-      ? editor.value.getValue()
-      : editorContent.value;
+    const content = editor ? editor.getValue() : editorContent.value;
 
     // Ensure file has correct extension
     let name = fileName.value;
