@@ -59,6 +59,7 @@
               <button
                 @click="refreshLogs"
                 class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+                :class="{ 'animate-spin': isLoading }"
                 title="Refresh logs"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -67,7 +68,7 @@
               </button>
               <button
                 @click="exportLogs"
-                :disabled="filteredLogs.length === 0"
+                :disabled="filteredLogs.length === 0 || isLoading"
                 class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 title="Export logs"
               >
@@ -77,7 +78,7 @@
               </button>
               <button
                 @click="clearLogs"
-                :disabled="logs.length === 0"
+                :disabled="store.logs.length === 0 || isLoading"
                 class="px-3 py-1 text-sm bg-red-600 hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-md transition-colors"
               >
                 Clear All
@@ -135,6 +136,12 @@
                       ]"
                     >
                       {{ log.status }}
+                    </span>
+                    
+                    <!-- Script Name/Path -->
+                    <span class="text-xs text-gray-500 dark:text-gray-400">
+                      {{ log.fileName || 'Unknown Script' }}
+                      <span v-if="!log.scheduleId" class="ml-1 text-xs font-medium text-blue-500">(Manual)</span>
                     </span>
                     
                     <!-- Duration -->
@@ -205,7 +212,7 @@
         <!-- Footer -->
         <div class="bg-gray-50 dark:bg-gray-700 px-6 py-3 flex justify-between items-center flex-shrink-0">
           <div class="text-sm text-gray-500 dark:text-gray-400">
-            Showing {{ filteredLogs.length }} of {{ logs.length }} entries
+            Showing {{ filteredLogs.length }} of {{ store.logs.length }} entries
           </div>
           <button
             @click="$emit('close')"
@@ -220,13 +227,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useAppStore } from '../stores/app'
 import type { Schedule, ScheduleLog } from '../shared/types'
 
 interface Props {
   isOpen: boolean
   schedule: Schedule | null
-  logs: ScheduleLog[]
 }
 
 interface Emits {
@@ -234,33 +241,35 @@ interface Emits {
 }
 
 const props = defineProps<Props>()
-defineEmits<Emits>()
+const emit = defineEmits<Emits>()
 
+const store = useAppStore()
 const activeStatusFilter = ref<'all' | 'success' | 'error'>('all')
 const expandedLogs = ref(new Set<string>())
+const isLoading = ref(false)
 
 // Status filters with counts
 const statusFilters = computed(() => [
   { 
     key: 'all' as const, 
     label: 'All', 
-    count: props.logs.length 
+    count: store.logs.length 
   },
   { 
     key: 'success' as const, 
     label: 'Success', 
-    count: props.logs.filter(log => log.status === 'success').length 
+    count: store.logs.filter(log => log.status === 'success').length 
   },
   { 
     key: 'error' as const, 
     label: 'Error', 
-    count: props.logs.filter(log => log.status === 'error').length 
+    count: store.logs.filter(log => log.status === 'error').length 
   }
 ])
 
 // Filtered logs based on status filter
 const filteredLogs = computed(() => {
-  let filtered = props.logs
+  let filtered = store.logs
 
   if (activeStatusFilter.value !== 'all') {
     filtered = filtered.filter(log => log.status === activeStatusFilter.value)
@@ -284,11 +293,13 @@ function toggleLogExpansion(logId: string) {
 // Refresh logs
 async function refreshLogs() {
   try {
+    isLoading.value = true
     const scheduleId = props.schedule?.id
-    // This would typically call the store method to refresh logs
-    await window.electronAPI.invoke('database:get-logs', scheduleId, 100)
+    await store.loadLogs(scheduleId, 100)
   } catch (error) {
     console.error('Failed to refresh logs:', error)
+  } finally {
+    isLoading.value = false
   }
 }
 
@@ -315,10 +326,14 @@ async function exportLogs() {
 async function clearLogs() {
   if (confirm('Are you sure you want to clear all logs? This action cannot be undone.')) {
     try {
+      isLoading.value = true
       await window.electronAPI.invoke('database:clear-logs', props.schedule?.id)
-      // This would typically trigger a refresh of logs in the parent component
+      // Refresh logs after clearing
+      await refreshLogs()
     } catch (error) {
       console.error('Failed to clear logs:', error)
+    } finally {
+      isLoading.value = false
     }
   }
 }
@@ -353,4 +368,11 @@ function handleBackdropClick(event: MouseEvent) {
     emit('close')
   }
 }
+
+// Load logs when component is mounted
+onMounted(async () => {
+  if (props.isOpen) {
+    await refreshLogs()
+  }
+})
 </script>

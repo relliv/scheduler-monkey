@@ -126,7 +126,6 @@
     <LogsModal
       :is-open="logsModal.isOpen"
       :schedule="logsModal.schedule"
-      :logs="logsModal.logs"
       @close="closeLogsModal"
     />
 

@@ -201,6 +201,8 @@ function setupDatabaseHandlers() {
         .limit(limit)
         .all()
     }
+    
+    // Include both scheduled and manual logs (where scheduleId can be null)
     return db.select().from(scheduleLogs)
       .orderBy(desc(scheduleLogs.executionTime))
       .limit(limit)
