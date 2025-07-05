@@ -101,12 +101,14 @@
           @click="stopAllSchedules"
           :disabled="activeSchedules.length === 0"
           class="text-sm px-3 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-md transition-colors"
+          v-tippy="{ content: 'Stop all running schedules', placement: 'top' }"
         >
           Stop All
         </button>
         <button
           @click="viewAllLogs"
           class="text-sm px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-md transition-colors flex items-center justify-center space-x-1"
+          v-tippy="{ content: 'View execution logs for all schedules', placement: 'top' }"
         >
           <span>View Logs</span>
           <span v-if="logCount > 0" class="bg-gray-800 text-xs px-1.5 py-0.5 rounded-full">{{ logCount }}</span>
