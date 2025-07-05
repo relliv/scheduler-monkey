@@ -131,8 +131,8 @@
 
     <BunInstallModal
       :is-open="bunInstallModal.isOpen"
-      :is-installing="bunInstallModal.isInstalling"
-      :installation-progress="bunInstallModal.installationProgress"
+      :installation-status="bunInstallModal.isInstalling ? 'installing' : 'not-installed'"
+      :install-progress="bunInstallModal.installationProgress"
       @close="closeBunInstallModal"
       @install="installBun"
     />
@@ -150,8 +150,8 @@
 import { onMounted, onBeforeUnmount, ref } from "vue";
 import { storeToRefs } from "pinia";
 import { useAppStore } from "./stores/app";
-import AppHeader from "./components/AppHeader.vue";
-import AppSidebar from "./components/AppSidebar.vue";
+import AppHeader from "./layouts/AppHeader.vue";
+import AppSidebar from "./layouts/AppSidebar.vue";
 import ScriptFilesTable from "./components/ScriptFilesTable.vue";
 import ScheduleModal from "./components/ScheduleModal.vue";
 import LogsModal from "./components/LogsModal.vue";

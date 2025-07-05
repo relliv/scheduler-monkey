@@ -239,9 +239,9 @@ function refreshVault() {
 
 function openAbout() {
   showMenu.value = false;
-  window.electronAPI.invoke("system:show-info-dialog", {
-    title: "About Scheduler-Monkey",
-    message: `Scheduler-Monkey v1.0.0\n\nA modern TypeScript script scheduler built with Electron, Vue 3, and TailwindCSS.\n\nFeatures:\n• Schedule TypeScript/JavaScript files with cron expressions\n• Bun.js integration for fast script execution\n• SQLite database with Drizzle ORM\n• Real-time logging and monitoring\n• Modern, responsive UI`,
-  });
+  window.electronAPI.invoke("system:show-info-dialog", 
+    "About Scheduler-Monkey",
+    `Scheduler-Monkey v1.0.0\n\nA modern TypeScript script scheduler built with Electron, Vue 3, and TailwindCSS.\n\nFeatures:\n• Schedule TypeScript/JavaScript files with cron expressions\n• Bun.js integration for fast script execution\n• SQLite database with Drizzle ORM\n• Real-time logging and monitoring\n• Modern, responsive UI`
+  );
 }
 </script>

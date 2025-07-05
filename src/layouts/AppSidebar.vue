@@ -226,8 +226,13 @@ async function toggleSchedule(schedule: Schedule) {
     } else {
       await window.electronAPI.invoke('scheduler:add-job', {
         id: schedule.id,
+        vaultId: schedule.vaultId,
+        filePath: schedule.filePath,
+        fileName: schedule.fileName,
         cronExpression: schedule.cronExpression,
-        scriptPath: schedule.filePath
+        isActive: true,
+        createdAt: schedule.createdAt,
+        updatedAt: schedule.updatedAt
       })
     }
   } catch (error) {
