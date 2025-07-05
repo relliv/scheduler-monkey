@@ -82,6 +82,7 @@ export interface IpcChannels {
   "scheduler:stop": () => Promise<void>;
   "scheduler:add-job": (schedule: Schedule) => Promise<void>;
   "scheduler:remove-job": (scheduleId: string) => Promise<void>;
+  "scheduler:notify": (data: { schedule: Schedule, result: ExecutionResult, log: ScheduleLog }) => Promise<void>;
   "scheduler:get-next-runs": (
     cronExpression: string,
     count?: number

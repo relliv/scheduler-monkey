@@ -19,6 +19,7 @@ export const useAppStore = defineStore('app', () => {
   const scriptFiles = ref<ScriptFile[]>([])
   const schedules = ref<Schedule[]>([])
   const logs = ref<ScheduleLog[]>([])
+  const lastCheckedTime = ref<Date | null>(null)
   const isLoading = ref(false)
   const error = ref<string | null>(null)
   
@@ -257,27 +258,58 @@ export const useAppStore = defineStore('app', () => {
     }
   }
   
+  // Add a single log entry directly to the store for real-time updates
+  function addLogEntry(log: ScheduleLog) {
+    if (!log) return
+    
+    // Add to the beginning of the logs array for chronological order (newest first)
+    logs.value = [log, ...logs.value]
+    
+    // Update last checked time to reflect the real-time update
+    lastCheckedTime.value = new Date()
+  }
+  
   async function executeScript(scriptFile: ScriptFile) {
     try {
       setLoading(true)
-      const startTime = Date.now()
       const result = await window.electronAPI.invoke('bun:execute-script', scriptFile.fullPath)
+      
+      // Create a manual log entry
+      const startTime = Date.now()
       const executionDuration = Date.now() - startTime
       
-      // Create log entry for manual execution
-      try {
-        await window.electronAPI.invoke('database:create-manual-log', {
+      const logData = {
+        fileName: scriptFile.name,
+        filePath: scriptFile.fullPath,
+        status: result.success ? 'success' as const : 'error' as const,
+        output: result.output,
+        errorMessage: result.error,
+        executionTime: new Date(),
+        executionDuration
+      }
+      
+      const createdLog = await window.electronAPI.invoke('database:create-manual-log', logData)
+      
+      // Notify UI about the execution using the scheduler:notify event
+      if (createdLog) {
+        // Create a pseudo-schedule object for manual executions
+        const pseudoSchedule = {
+          id: 'manual-execution',
           fileName: scriptFile.name,
           filePath: scriptFile.fullPath,
-          status: result.success ? 'success' : 'error',
-          output: result.output || '',
-          errorMessage: result.error || '',
-          executionTime: new Date(),
-          executionDuration
+          cronExpression: 'manual',
+          isActive: false
+        }
+        
+        // Notify UI about the execution
+        await window.electronAPI.invoke('scheduler:notify', {
+          schedule: pseudoSchedule,
+          result,
+          log: createdLog
         })
-      } catch (logErr) {
-        console.error('Failed to create log entry:', logErr)
-        // Don't throw here to avoid interrupting the main flow
+      } else {
+        // Fallback to traditional refresh if log creation failed
+        await loadLogs()
       }
       
       return result
@@ -397,6 +429,7 @@ export const useAppStore = defineStore('app', () => {
     scriptFiles,
     schedules,
     logs,
+    lastCheckedTime,
     isLoading,
     error,
     scheduleModal,
@@ -417,11 +450,13 @@ export const useAppStore = defineStore('app', () => {
     selectInitialVault,
     selectVault,
     loadScriptFiles,
+    scanVaultDirectory,
     loadSchedules,
     createSchedule,
     updateSchedule,
     deleteSchedule,
     loadLogs,
+    addLogEntry,
     executeScript,
     checkBunInstallation,
     installBun,
@@ -435,7 +470,6 @@ export const useAppStore = defineStore('app', () => {
     closeBunInstallModal,
     openScriptModal,
     closeScriptModal,
-    scanVaultDirectory,
     
     // Utility actions
     setLoading,

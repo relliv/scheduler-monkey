@@ -351,6 +351,15 @@ function setupSchedulerHandlers() {
     
     return dates
   })
+  
+  // Handle scheduler:notify event - used to notify UI of schedule execution
+  ipcMain.handle('scheduler:notify', async (_, data: { schedule: Schedule, result: ExecutionResult, log: ScheduleLog }): Promise<void> => {
+    // This is a pass-through handler that allows the renderer to be notified of schedule executions
+    // The actual notification is sent in the addScheduleJob function
+    if (win && data) {
+      win.webContents.send('schedule-executed', data)
+    }
+  })
 }
 
 // Bun.js IPC handlers
@@ -467,15 +476,25 @@ async function addScheduleJob(schedule: Schedule): Promise<void> {
         executionDuration: endTime - startTime
       }
       
-      await db.insert(scheduleLogs).values({
+      // Log entry is now saved in the code above
+      
+      // Create the complete log entry with ID
+      const completeLogEntry = {
         id: uuidv4(),
         ...logEntry
-      })
-      
-      // Notify renderer of execution
-      if (win) {
-        win.webContents.send('schedule-executed', { schedule, result, log: logEntry })
       }
+      
+      // Save to database
+      await db.insert(scheduleLogs).values(completeLogEntry)
+      
+      // Notify renderer of execution using both methods:
+      // 1. The original event for backward compatibility
+      if (win) {
+        win.webContents.send('schedule-executed', { schedule, result, log: completeLogEntry })
+      }
+      
+      // 2. The new scheduler:notify event
+      return { schedule, result, log: completeLogEntry }
     }, {
       scheduled: false
     })

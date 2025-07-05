@@ -147,7 +147,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount } from "vue";
+import { onMounted, onBeforeUnmount, ref } from "vue";
 import { storeToRefs } from "pinia";
 import { useAppStore } from "./stores/app";
 import AppHeader from "./components/AppHeader.vue";
@@ -160,6 +160,9 @@ import ScriptModal from "./components/ScriptModal.vue";
 import type { ScriptFile, Schedule } from "./shared/types";
 
 const store = useAppStore();
+
+// Store the unsubscribe function for the schedule execution event
+const scheduleExecutionUnsubscribe = ref<(() => void) | null>(null);
 
 const {
   currentVault,
@@ -200,11 +203,20 @@ onMounted(() => {
   
   // Add window focus event listener to refresh logs
   window.addEventListener('focus', handleWindowFocus);
+  
+  // Listen for schedule execution events from main process
+  // Store the unsubscribe function for cleanup
+  scheduleExecutionUnsubscribe.value = window.electronAPI.on('schedule-executed', handleScheduleExecuted);
 });
 
 // Remove event listeners on unmount
 onBeforeUnmount(() => {
   window.removeEventListener('focus', handleWindowFocus);
+  
+  // Clean up schedule execution listener
+  if (scheduleExecutionUnsubscribe.value) {
+    scheduleExecutionUnsubscribe.value();
+  }
 });
 
 // Handle window focus event
@@ -219,6 +231,47 @@ async function handleWindowFocus() {
     }
   } catch (err) {
     console.error('Failed to refresh logs on window focus:', err);
+  }
+}
+
+// Handle schedule execution event from main process
+async function handleScheduleExecuted(eventData: { schedule: any, result: any, log: any }) {
+  try {
+    console.log('Schedule executed event received:', eventData);
+    
+    // Add the new log to the store immediately for real-time UI updates
+    if (eventData && eventData.log) {
+      // Update the store's logs array with the new log entry
+      store.addLogEntry(eventData.log);
+      
+      // If logs modal is open, check if we need to refresh its content
+      if (logsModal.value.isOpen) {
+        const currentScheduleId = logsModal.value.schedule?.id;
+        const executedScheduleId = eventData.schedule?.id;
+        
+        // If showing all logs or logs for the executed schedule, no need to refresh
+        // as the addLogEntry already updated the UI reactively
+        
+        // But if showing logs for a different schedule, we need to update the badge count
+        if (currentScheduleId && currentScheduleId !== executedScheduleId) {
+          // Just update the total logs count without changing the current view
+          await store.loadLogs();
+        }
+      } else {
+        // Modal is closed, just update the total logs count for the badge
+        await store.loadLogs();
+      }
+    } else {
+      // Fallback to full refresh if no log data is provided
+      await store.loadLogs();
+      
+      // If logs modal is open, refresh its content
+      if (logsModal.value.isOpen) {
+        await store.loadLogs(logsModal.value.schedule?.id);
+      }
+    }
+  } catch (err) {
+    console.error('Failed to update logs after schedule execution:', err);
   }
 }
 
