@@ -62,6 +62,7 @@ async function createWindow() {
     height: 800,
     minWidth: 800,
     minHeight: 600,
+    show: false, // Don't show until ready to maximize
     icon: path.join(process.env.VITE_PUBLIC, 'favicon.ico'),
     webPreferences: {
       preload,
@@ -73,6 +74,9 @@ async function createWindow() {
       // contextIsolation: false,
     },
   })
+  
+  // Always maximize the window when it's created
+  win.maximize()
 
   if (VITE_DEV_SERVER_URL) { // #298
     win.loadURL(VITE_DEV_SERVER_URL)
