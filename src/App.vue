@@ -147,7 +147,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from "vue";
+import { onMounted, onBeforeUnmount } from "vue";
 import { storeToRefs } from "pinia";
 import { useAppStore } from "./stores/app";
 import AppHeader from "./components/AppHeader.vue";
@@ -197,7 +197,30 @@ const {
 // Initialize app on mount
 onMounted(() => {
   initializeApp();
+  
+  // Add window focus event listener to refresh logs
+  window.addEventListener('focus', handleWindowFocus);
 });
+
+// Remove event listeners on unmount
+onBeforeUnmount(() => {
+  window.removeEventListener('focus', handleWindowFocus);
+});
+
+// Handle window focus event
+async function handleWindowFocus() {
+  try {
+    // Refresh log count
+    await store.loadLogs();
+    
+    // If logs modal is open, refresh its content
+    if (logsModal.value.isOpen) {
+      await store.loadLogs(logsModal.value.schedule?.id);
+    }
+  } catch (err) {
+    console.error('Failed to refresh logs on window focus:', err);
+  }
+}
 
 // Handle schedule save (create or update)
 async function handleScheduleSave(scheduleData: {

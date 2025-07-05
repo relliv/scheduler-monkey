@@ -117,7 +117,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import { useAppStore } from '../stores/app'
 import type { Schedule } from '../shared/types'
 
@@ -150,6 +150,13 @@ async function fetchLogCount() {
 // Fetch log count on component mount
 onMounted(() => {
   fetchLogCount()
+  
+  // Subscribe to log updates
+  window.addEventListener('focus', fetchLogCount)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('focus', fetchLogCount)
 })
 
 // View schedule logs
