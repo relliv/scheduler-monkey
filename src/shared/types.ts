@@ -65,6 +65,8 @@ export interface IpcChannels {
   "file:select-directory": () => Promise<string | null>;
   "file:scan-directory": (path: string) => Promise<ScriptFile[]>;
   "file:watch-directory": (path: string) => Promise<void>;
+  "file:read": (path: string) => Promise<string>;
+  "file:write": (options: { path: string, content: string }) => Promise<void>;
 
   // Scheduler operations
   "scheduler:start": () => Promise<void>;
@@ -111,6 +113,11 @@ export interface LogsModalState {
   isOpen: boolean;
   schedule: Schedule | null;
   logs: ScheduleLog[];
+}
+
+export interface ScriptModalState {
+  isOpen: boolean;
+  scriptFile: ScriptFile | null;
 }
 
 export interface BunInstallModalState {

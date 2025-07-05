@@ -8,7 +8,8 @@ import type {
   ScheduleModalState, 
   LogsModalState, 
   BunInstallModalState,
-  BunInstallationStatus 
+  BunInstallationStatus,
+  ScriptModalState 
 } from '../shared/types'
 
 export const useAppStore = defineStore('app', () => {
@@ -38,6 +39,11 @@ export const useAppStore = defineStore('app', () => {
     isOpen: false,
     isInstalling: false,
     installationProgress: 0
+  })
+  
+  const scriptModal = ref<ScriptModalState>({
+    isOpen: false,
+    scriptFile: null
   })
   
   // Bun installation status
@@ -141,6 +147,15 @@ export const useAppStore = defineStore('app', () => {
       scriptFiles.value = await window.electronAPI.invoke('file:scan-directory', vaultPath)
     } catch (err) {
       console.error('Failed to load script files:', err)
+      throw err
+    }
+  }
+  
+  async function scanVaultDirectory(vaultPath: string) {
+    try {
+      scriptFiles.value = await window.electronAPI.invoke('file:scan-directory', vaultPath)
+    } catch (err) {
+      console.error('Failed to scan vault directory:', err)
       throw err
     }
   }
@@ -342,6 +357,20 @@ export const useAppStore = defineStore('app', () => {
     bunInstallModal.value.isOpen = false
   }
   
+  function openScriptModal(scriptFile: ScriptFile | null) {
+    scriptModal.value = {
+      isOpen: true,
+      scriptFile
+    }
+  }
+  
+  function closeScriptModal() {
+    scriptModal.value = {
+      isOpen: false,
+      scriptFile: null
+    }
+  }
+  
   // Utility actions
   function setLoading(loading: boolean) {
     isLoading.value = loading
@@ -367,6 +396,7 @@ export const useAppStore = defineStore('app', () => {
     scheduleModal,
     logsModal,
     bunInstallModal,
+    scriptModal,
     bunStatus,
     
     // Computed
@@ -397,6 +427,9 @@ export const useAppStore = defineStore('app', () => {
     closeLogsModal,
     openBunInstallModal,
     closeBunInstallModal,
+    openScriptModal,
+    closeScriptModal,
+    scanVaultDirectory,
     
     // Utility actions
     setLoading,

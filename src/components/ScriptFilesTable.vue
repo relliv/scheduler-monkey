@@ -10,6 +10,17 @@
           </p>
         </div>
         
+        <!-- Create Script Button -->
+        <button
+          @click="$emit('create-script')"
+          class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md transition-colors flex items-center space-x-2"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          <span>Create Script</span>
+        </button>
+        
         <!-- Filter Tabs -->
         <div class="flex space-x-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
           <button
@@ -102,7 +113,7 @@
                     {{ file.name }}
                   </div>
                   <div class="text-sm text-gray-500 dark:text-gray-400 truncate max-w-xs">
-                    {{ file.relativePath }}
+                    {{ file.path }}
                   </div>
                 </div>
               </div>
@@ -155,7 +166,7 @@
               {{ formatDate(file.lastModified) }}
             </td>
 
-            <!-- Actions -->
+              <!-- Actions -->
             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
               <div class="flex items-center justify-end space-x-2">
                 <!-- Execute Button -->
@@ -166,6 +177,17 @@
                 >
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </button>
+
+                <!-- Edit Script Button -->
+                <button
+                  @click="$emit('edit-script', file)"
+                  class="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 p-1 rounded hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
+                  title="Edit script content"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
                 </button>
 
@@ -228,6 +250,8 @@ interface Emits {
   (e: 'schedule-script', file: ScriptFile): void
   (e: 'execute-script', file: ScriptFile): void
   (e: 'edit-schedule', file: ScriptFile): void
+  (e: 'create-script'): void
+  (e: 'edit-script', file: ScriptFile): void
 }
 
 const props = defineProps<Props>()
@@ -264,7 +288,7 @@ const filteredFiles = computed(() => {
     const query = searchQuery.value.toLowerCase()
     files = files.filter(file => 
       file.name.toLowerCase().includes(query) ||
-      file.relativePath.toLowerCase().includes(query)
+      file.path.toLowerCase().includes(query)
     )
   }
 
