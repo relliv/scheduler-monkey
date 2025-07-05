@@ -144,6 +144,7 @@ let editor: monaco.editor.IStandaloneCodeEditor | null = null;
 // Initialize editor when component is mounted
 onMounted(async () => {
   await nextTick();
+
   if (editorContainer.value) {
     initializeEditor();
   }
@@ -153,6 +154,8 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   if (editor) {
     editor.dispose();
+
+    editor = null;
   }
 });
 
@@ -184,9 +187,8 @@ watch(
   async (isOpen) => {
     if (isOpen) {
       await nextTick();
-      if (!editor && editorContainer.value) {
-        initializeEditor();
-      }
+
+      initializeEditor();
     }
   }
 );
