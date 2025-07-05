@@ -1,7 +1,8 @@
 import { App } from 'vue'
 import tippy from 'tippy.js'
-import 'tippy.js/dist/tippy.css'
-import 'tippy.js/animations/scale.css'
+
+// Import our custom CSS that includes all required Tippy.js styles
+import './tippy.css'
 
 export default {
   install: (app: App) => {

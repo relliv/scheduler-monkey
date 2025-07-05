@@ -74,6 +74,12 @@
                   ? 'bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50'
                   : 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50'
               ]"
+              v-tippy="{
+                content: schedule.isActive ? 'Stop this schedule' : 'Start this schedule',
+                placement: 'top',
+                theme: 'scheduler-theme',
+                animation: 'scale'
+              }"
             >
               {{ schedule.isActive ? 'Stop' : 'Start' }}
             </button>
@@ -81,11 +87,31 @@
 
           <!-- Cron Expression -->
           <div class="text-xs text-gray-600 dark:text-gray-400 mb-2">
-            <code class="bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded">{{ schedule.cronExpression }}</code>
+            <code 
+              class="bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded"
+              v-tippy="{
+                content: `<div class='p-2'>
+                  <p class='font-semibold mb-1'>Cron Schedule</p>
+                  <p>Next run: ${getNextRunTime(schedule.cronExpression)}</p>
+                  <p class='text-xs mt-2 text-gray-500'>Format: minute hour day-of-month month day-of-week</p>
+                </div>`,
+                allowHTML: true,
+                placement: 'bottom',
+                theme: 'light-border'
+              }"
+            >{{ schedule.cronExpression }}</code>
           </div>
 
           <!-- Next Run -->
-          <div v-if="schedule.isActive" class="text-xs text-gray-500 dark:text-gray-400">
+          <div 
+            v-if="schedule.isActive" 
+            class="text-xs text-gray-500 dark:text-gray-400"
+            v-tippy="{
+              content: 'This is the estimated next execution time based on the cron expression',
+              placement: 'right',
+              theme: 'scheduler-theme'
+            }"
+          >
             Next run: {{ getNextRunTime(schedule.cronExpression) }}
           </div>
 
@@ -99,6 +125,13 @@
                   ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
                   : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
               ]"
+              v-tippy="{
+                content: schedule.lastExecutionStatus === 'success' 
+                  ? 'Script executed successfully' 
+                  : 'Script execution failed. Check logs for details',
+                placement: 'top',
+                theme: schedule.lastExecutionStatus === 'success' ? 'scheduler-theme' : 'tomato'
+              }"
             >
               {{ schedule.lastExecutionStatus || 'unknown' }}
             </span>
@@ -135,14 +168,15 @@
 import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import { useAppStore } from '../stores/app'
 import type { Schedule } from '../shared/types'
+import type { ExtendedSchedule } from '../shared/extendedTypes'
 
 interface Props {
-  schedules: Schedule[]
-  activeSchedules: Schedule[]
+  schedules: ExtendedSchedule[]
+  activeSchedules: ExtendedSchedule[]
 }
 
 interface Emits {
-  (e: 'view-logs', schedule: Schedule): void
+  (e: 'view-logs', schedule: ExtendedSchedule): void
 }
 
 const props = defineProps<Props>()
@@ -175,7 +209,7 @@ onBeforeUnmount(() => {
 })
 
 // View schedule logs
-function viewScheduleLogs(schedule: Schedule) {
+function viewScheduleLogs(schedule: ExtendedSchedule) {
   emit('view-logs', schedule)
 }
 
