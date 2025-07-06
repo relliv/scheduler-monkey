@@ -572,14 +572,78 @@ async function installBun(): Promise<boolean> {
   })
 }
 
-async function executeScript(scriptPath: string, timeout = 30000): Promise<ExecutionResult> {
-  return new Promise((resolve) => {
-    const startTime = Date.now()
+// Helper function to find Bun executable path
+async function findBunPath(): Promise<string> {
+  // Common installation paths for Bun
+  const commonPaths = [
+    path.join(os.homedir(), '.bun', 'bin', 'bun'),
+    '/usr/local/bin/bun',
+    '/opt/homebrew/bin/bun',
+    '/usr/bin/bun',
+    // Add Windows paths if needed
+    process.platform === 'win32' ? path.join(os.homedir(), '.bun', 'bin', 'bun.exe') : null,
+  ].filter(Boolean) as string[];
+
+  // Try to find bun in PATH using 'which' or 'where' command
+  try {
+    const whichCommand = process.platform === 'win32' ? 'where' : 'which';
+    const { stdout } = await import('node:child_process').then(cp => 
+      new Promise<{stdout: string, stderr: string}>((resolve, reject) => {
+        const proc = cp.exec(`${whichCommand} bun`, (error, stdout, stderr) => {
+          if (error && !stdout) {
+            reject(error);
+          } else {
+            resolve({ stdout, stderr });
+          }
+        });
+      })
+    );
     
-    const bunProcess = spawn('bun', ['run', scriptPath], {
-      stdio: 'pipe',
-      timeout
-    })
+    const bunPath = stdout.trim();
+    if (bunPath && await fs.access(bunPath).then(() => true).catch(() => false)) {
+      return bunPath;
+    }
+  } catch (error) {
+    console.log('Could not find bun in PATH, checking common locations');
+  }
+
+  // Check common installation paths
+  for (const potentialPath of commonPaths) {
+    try {
+      await fs.access(potentialPath);
+      return potentialPath;
+    } catch {}
+  }
+
+  // Default to just 'bun' and hope it's in PATH when executed
+  return 'bun';
+}
+
+async function executeScript(scriptPath: string, timeout = 30000): Promise<ExecutionResult> {
+  return new Promise(async (resolve) => {
+    const startTime = Date.now();
+    let bunProcess;
+    
+    try {
+      // Dynamically find the bun executable path
+      const bunPath = await findBunPath();
+      
+      bunProcess = spawn(bunPath, ['run', scriptPath], {
+        stdio: 'pipe',
+        timeout,
+        env: { ...process.env }, // Ensure we pass all environment variables
+        shell: true // Use shell to resolve the command from PATH
+      });
+    } catch (error) {
+      console.error('Failed to spawn bun process:', error);
+      resolve({
+        success: false,
+        output: '',
+        error: `Failed to spawn bun process: ${error}`,
+        duration: Date.now() - startTime
+      });
+      return;
+    }
     
     let stdout = ''
     let stderr = ''
